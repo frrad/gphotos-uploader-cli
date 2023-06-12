@@ -137,24 +137,29 @@ func (cmd *PushCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	for i := 0; i < 100; i++ {
-		albumName := fmt.Sprintf("auto-generate-%d", i)
-		album, err := photosService2.Albums.Create(ctx, albumName)
+	//albumId := "AKn5DKms1KQmdDW0HFoZY3jVN43W70mrmcpLxZWT3xIgGOA8csB65u9sT7XBwLSJLA9JDev6xIX0"
+	//albumName := "album14504"
+
+	for i := 0; i < 1; i++ {
+		cli.Logger.Debugf("Starting Request [%d]", i)
+
+		_, err := photosService2.Albums.List(ctx)
 		if err != nil {
 			if googleApiErr, ok := err.(*googleapi.Error); ok {
 				if requestQuotaErrorRe.MatchString(googleApiErr.Message) {
-					cli.Logger.Failf("Daily quota exceeded: waiting 12h until quota is recovered: err=%v", googleApiErr)
-					fmt.Printf("Google error: %v", googleApiErr)
+					cli.Logger.Failf("Daily quota exceeded: waiting 12h until quota is recovered: err=%s", googleApiErr)
+					fmt.Printf("\nGoogle error:\n%v", googleApiErr)
 					return err
 				}
-				fmt.Printf("Google error: %v", googleApiErr)
+				fmt.Printf("\nGoogle error:\n%v", googleApiErr)
 			} else {
-				cli.Logger.Failf("Error processing %s", albumName)
-				fmt.Printf("Error: %v", err)
+				cli.Logger.Failf("Error processing request %d", i)
+				fmt.Printf("\nError:\n%v", err)
 				continue
 			}
 		}
-		cli.Logger.Debugf("Created album [%s]: %s", albumName, album.ID)
+
+		cli.Logger.Debugf("Completing request [%d]", i)
 	}
 
 	// launch all folder upload jobs
